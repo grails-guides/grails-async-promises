@@ -1,0 +1,7 @@
+Create a controllered named `CitiesController` which uses the previous service method:
+
+[source, groovy]
+.grails-app/controllers/demo/CitiesController.groovy
+----
+include::{sourcedir}/grails-app/controllers/demo/CitiesController.groovy[]
+----
