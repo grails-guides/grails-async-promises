@@ -12,7 +12,7 @@ In Grails the `grails.async.Promises` class provides the entry point to the Prom
 include::{sourcedir}/grails-app/services/org/openweathermap/OpenweathermapService.groovy[tag=promisesImports]
 ----
 
-Add to `OpenweathermapService` the next methods:
+Add to `OpenweathermapService` the following methods:
 
 [source, groovy]
 .grails-app/services/org/openweathermap/OpenweathermapService.groovy
@@ -20,10 +20,10 @@ Add to `OpenweathermapService` the next methods:
 include::{sourcedir}/grails-app/services/org/openweathermap/OpenweathermapService.groovy[tag=findCurrentWeatherByCitiesAndCountryCodeAsync]
 ----
 
-<1> The `task` method, which returns an instance of the grails.async.Promise 
-<2> The `waitAll` method waits synchronously, blocking the current thread, for all of the concurrent tasks to complete and returns the results.
+<1> The `task` method, which returns an instance of the `grails.async.Promise`.
+<2> A `PromiseList` is returned which contains a union of all of the created `grails.async.Promise` instances
 
-Add an equivalent synchronous method. 
+Add an equivalent synchronous method.
 
 [source, groovy]
 .grails-app/services/org/openweathermap/OpenweathermapService.groovy

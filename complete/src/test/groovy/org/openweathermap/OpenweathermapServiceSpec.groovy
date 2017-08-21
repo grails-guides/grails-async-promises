@@ -7,8 +7,14 @@ import spock.lang.Specification
 
 class OpenweathermapServiceSpec extends Specification implements ServiceUnitTest<OpenweathermapService> {
 //end::classdeclaration[]
+    @Override
+    Closure doWithSpring() {
+        { ->
+            openweathermapConfiguration(OpenweathermapConfiguration)
+        }
+    }
 
-    //tag::401[]
+//tag::401[]
     def "For an unauthorized key, null is return"() {
         given:
         ErsatzServer ersatz = new ErsatzServer()
@@ -26,8 +32,11 @@ class OpenweathermapServiceSpec extends Specification implements ServiceUnitTest
             }
         }
         ersatz.start()
-        service.openWeatherUrl = ersatz.httpUrl // <4>
-        service.appid = appid
+        service.openweathermapConfiguration = new OpenweathermapConfiguration( // <4>
+                openWeatherUrl: ersatz.httpUrl,
+                appid: appid
+        )
+
 
         when:
         CurrentWeather currentWeather = service.currentWeather(city, countryCode)
@@ -53,18 +62,20 @@ class OpenweathermapServiceSpec extends Specification implements ServiceUnitTest
         String expected = '''{"coord":{"lon":-0.13,"lat":51.51},"weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04d"}],"base":"stations","main":{"temp":20.81,"pressure":1017,"humidity":53,"temp_min":19,"temp_max":22},"visibility":10000,"wind":{"speed":3.6,"deg":180,"gust":9.8},"clouds":{"all":75},"dt":1502707800,"sys":{"type":1,"id":5091,"message":0.0029,"country":"GB","sunrise":1502685920,"sunset":1502738622},"id":2643743,"name":"London","cod":200}'''
         ersatz.expectations {
             get('/data/2.5/weather') {
-                query('q',"${city},${countryCode}")
+                query('q', "${city},${countryCode}")
                 query('appid', appid)
                 called(1)
                 responder {
                     code(200)
-                    content expected,'application/json'
+                    content expected, 'application/json'
                 }
             }
         }
         ersatz.start()
-        service.openWeatherUrl = ersatz.httpUrl
-        service.appid = appid
+        service.openweathermapConfiguration = new OpenweathermapConfiguration(
+                openWeatherUrl: ersatz.httpUrl,
+                appid: appid
+        )
 
         when:
         CurrentWeather currentWeather = service.currentWeather(city, countryCode)

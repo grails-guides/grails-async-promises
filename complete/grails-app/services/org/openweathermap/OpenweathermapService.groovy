@@ -1,5 +1,8 @@
 //tag::packageAndImports[]
 package org.openweathermap
+
+import grails.async.Promise
+import grails.async.PromiseList
 import grails.plugins.rest.client.RestBuilder
 import grails.plugins.rest.client.RestResponse
 import groovy.transform.CompileDynamic
@@ -61,15 +64,14 @@ class OpenweathermapService {
 //end::currentWeather[]
 
 //tag::findCurrentWeatherByCitiesAndCountryCodeAsync[]
-    List<CurrentWeather> findCurrentWeatherByCitiesAndCountryCodeWithPromises(List<String> cities, String countryCode, Unit unit) {
-        List list = []
+    Promise<List<CurrentWeather>> findCurrentWeatherByCitiesAndCountryCodeWithPromises(List<String> cities, String countryCode, Unit unit) {
+        PromiseList<CurrentWeather> list = new PromiseList<CurrentWeather>()
         cities.each { String city -> 
             list << task { // <1>
                 currentWeather(city, countryCode, unit)
             }
         }
-        List l = waitAll(list) // <2>
-        l.flatten() as List<CurrentWeather>
+        return list // <2>
     }
 //end::findCurrentWeatherByCitiesAndCountryCodeAsync[]
 //tag::findCurrentWeatherByCitiesAndCountryCodeSynchronous[]    

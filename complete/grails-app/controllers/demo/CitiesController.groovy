@@ -1,5 +1,7 @@
 package demo
 
+import grails.async.Promise
+import static grails.async.Promises.*
 import groovy.transform.CompileStatic
 import org.openweathermap.CurrentWeather
 import org.openweathermap.OpenweathermapService
@@ -12,12 +14,17 @@ class CitiesController {
     
     def index(String unit, boolean async) {
         Unit unitEnum = Unit.unitWithString(unit)
-        List<CurrentWeather> currentWeatherList
-        if ( async ) {
-        	currentWeatherList = openweathermapService.findCurrentWeatherByCitiesAndCountryCodeWithPromises(LargestUSCities.CITIES, 'us', unitEnum)
-        } else {
-        	currentWeatherList = openweathermapService.findCurrentWeatherByCitiesAndCountryCode(LargestUSCities.CITIES, 'us', unitEnum)
+
+        if ( async ) { // <1>
+            Promise<List<CurrentWeather>> currentWeatherList = openweathermapService.findCurrentWeatherByCitiesAndCountryCodeWithPromises(LargestUSCities.CITIES, 'us', unitEnum)
+            return tasks( // <2>
+                    currentWeatherList: currentWeatherList,
+                    unit: createBoundPromise(unitEnum)
+            )
+        } else { // <3>
+            List<CurrentWeather> currentWeatherList = openweathermapService.findCurrentWeatherByCitiesAndCountryCode(LargestUSCities.CITIES, 'us', unitEnum)
+            return [currentWeatherList: currentWeatherList, unit: unitEnum]
         }        
-        [currentWeatherList: currentWeatherList, unit: unitEnum]
+
     }
 }
