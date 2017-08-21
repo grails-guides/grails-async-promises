@@ -1,12 +1,11 @@
 //tag::packageAndImports[]
 package org.openweathermap
-
-import grails.config.Config
-import grails.core.support.GrailsConfigurationAware
 import grails.plugins.rest.client.RestBuilder
 import grails.plugins.rest.client.RestResponse
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import org.springframework.beans.factory.annotation.Autowired
+
 //end::packageAndImports[]
 //tag::promisesImports[]
 import static grails.async.Promises.*
@@ -14,33 +13,23 @@ import static grails.async.Promises.*
 
 //tag::grailsConfigurationAware[]
 @CompileStatic
-class OpenweathermapService implements GrailsConfigurationAware {
-    String appid
-    String cityName
-    String countryCode
-    String openWeatherUrl
+class OpenweathermapService {
 
-    @Override
-    void setConfiguration(Config co) {
-        openWeatherUrl = co.getProperty('openweather.url', String, 'http://api.openweathermap.org')
-        appid = co.getProperty('openweather.appid', String)
-        cityName = co.getProperty('openweather.cityName', String)
-        countryCode = co.getProperty('openweather.countryCode', String)
-    }
+    @Autowired OpenweathermapConfiguration openweathermapConfiguration
 //end::grailsConfigurationAware[]
 
 //tag::currentWeather[]
     @CompileDynamic
     CurrentWeather currentWeather(Unit units = Unit.Standard) {
-        currentWeather(cityName, countryCode, units)
+        currentWeather(openweathermapConfiguration.cityName, openweathermapConfiguration.countryCode, units)
     }
 
 
     @CompileDynamic
     CurrentWeather currentWeather(String cityName, String countryCode, Unit unit = Unit.Standard) {
         RestBuilder rest = new RestBuilder()
-        String url = "${openWeatherUrl}/data/2.5/weather?q={city},{countryCode}&appid={appid}"
-        Map params = [city: cityName, countryCode: countryCode, appid: appid]
+        String url = "${openweathermapConfiguration.openWeatherUrl}/data/2.5/weather?q={city},{countryCode}&appid={appid}"
+        Map params = [city: cityName, countryCode: countryCode, appid: openweathermapConfiguration.appid]
         String unitParam = unitParameter(unit)
         if ( unitParam ) {
             params.units = unitParam
