@@ -3,6 +3,7 @@ package org.openweathermap
 import groovy.transform.CompileStatic
 import org.grails.web.json.JSONElement
 import groovy.transform.CompileDynamic
+import org.grails.web.json.JSONObject
 
 @CompileStatic
 class OpenweathermapParser  {
@@ -105,13 +106,13 @@ class OpenweathermapParser  {
         CurrentWeather currentWeather = new CurrentWeather()
 
         if ( json.coord ) {
-            currentWeather.coordinate = coordinateFromJsonElement(json.coord)
+            currentWeather.coordinate = coordinateFromJsonElement(new JSONObject(json.coord))
         }
         if ( json.main ) {
-            currentWeather.main = mainFromJsonElement(json.main)
+            currentWeather.main = mainFromJsonElement(new JSONObject(json.main))
         }
         if ( json.wind ) {
-            currentWeather.wind = windFromJsonElement(json.wind)
+            currentWeather.wind = windFromJsonElement(new JSONObject(json.wind))
         }
         if ( json.clouds ) {
             currentWeather.clouds = new Clouds()
@@ -120,7 +121,7 @@ class OpenweathermapParser  {
             }
         }
         if ( json.sys ) {
-            currentWeather.sys = sysFromJsonElement(json.sys)
+            currentWeather.sys = sysFromJsonElement(new JSONObject(json.sys))
         }
         if ( json.id ) {
             currentWeather.cityId = json.id as Long
@@ -144,7 +145,7 @@ class OpenweathermapParser  {
         if ( json.weather ) {
             currentWeather.weatherList = []
             for ( Object obj : json.weather ) {
-                Weather weather = weatherFromJsonElement(obj)
+                Weather weather = weatherFromJsonElement(new JSONObject(obj))
                 currentWeather.weatherList << weather
             }
         }

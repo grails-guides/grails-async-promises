@@ -3,13 +3,17 @@ package org.openweathermap
 
 import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
-import grails.plugins.rest.client.RestBuilder
-import grails.plugins.rest.client.RestResponse
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.client.HttpClient
+import io.micronaut.http.HttpRequest
+import io.micronaut.http.HttpResponse
+import org.grails.web.json.JSONObject
+
 //end::packageAndImports[]
 //tag::promisesImports[]
-import static grails.async.Promises.*
+
 //end::promisesImports[]
 
 //tag::grailsConfigurationAware[]
@@ -38,22 +42,20 @@ class OpenweathermapService implements GrailsConfigurationAware {
 
     @CompileDynamic
     CurrentWeather currentWeather(String cityName, String countryCode, Unit unit = Unit.Standard) {
-        RestBuilder rest = new RestBuilder()
-        String url = "${openWeatherUrl}/data/2.5/weather?q={city},{countryCode}&appid={appid}"
-        Map params = [city: cityName, countryCode: countryCode, appid: appid]
+        HttpClient client = HttpClient.create(openWeatherUrl.toURL())
+        String uri = "/data/2.5/weather?q=${cityName},${countryCode}&appid=${appid}"
         String unitParam = unitParameter(unit)
         if ( unitParam ) {
-            params.units = unitParam
-            url += "&units={units}"
-        }        
-        RestResponse restResponse = rest.get(url) { // <1>
-            urlVariables params
+            uri += "&units=${unitParam}"
         }
-
-        if ( restResponse.statusCode.value() == 200 && restResponse.json ) {
-            return OpenweathermapParser.currentWeatherFromJSONElement(restResponse.json) // <2>
+        try {
+            HttpResponse<Map> resp = client.toBlocking().exchange(HttpRequest.GET(uri), Map)
+            if ( resp.status == HttpStatus.OK && resp.body() ) {
+                return OpenweathermapParser.currentWeatherFromJSONElement(new JSONObject(resp.body())) // <2>
+            }
+        } catch (Exception e) {
+            return null // <3>
         }
-        null // <3>
     }
 
   /**

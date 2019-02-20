@@ -3,8 +3,11 @@ package org.openweathermap
 
 import grails.async.Promise
 import grails.async.PromiseList
-import grails.plugins.rest.client.RestBuilder
-import grails.plugins.rest.client.RestResponse
+import io.micronaut.http.HttpStatus
+import io.micronaut.http.client.HttpClient
+import io.micronaut.http.HttpRequest
+import io.micronaut.http.HttpResponse
+import org.grails.web.json.JSONObject
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,22 +33,20 @@ class OpenweathermapService {
 
     @CompileDynamic
     CurrentWeather currentWeather(String cityName, String countryCode, Unit unit = Unit.Standard) {
-        RestBuilder rest = new RestBuilder()
-        String url = "${openweathermapConfiguration.openWeatherUrl}/data/2.5/weather?q={city},{countryCode}&appid={appid}"
-        Map params = [city: cityName, countryCode: countryCode, appid: openweathermapConfiguration.appid]
+        HttpClient client = HttpClient.create(openweathermapConfiguration.openWeatherUrl.toURL())
+        String uri = "/data/2.5/weather?q=${cityName},${countryCode}&appid=${openweathermapConfiguration.appid}"
         String unitParam = unitParameter(unit)
         if ( unitParam ) {
-            params.units = unitParam
-            url += "&units={units}"
-        }        
-        RestResponse restResponse = rest.get(url) { // <1>
-            urlVariables params
+            uri += "&units=${unitParam}"
         }
-
-        if ( restResponse.statusCode.value() == 200 && restResponse.json ) {
-            return OpenweathermapParser.currentWeatherFromJSONElement(restResponse.json) // <2>
+        try {
+            HttpResponse<Map> resp = client.toBlocking().exchange(HttpRequest.GET(uri), Map)
+            if ( resp.status == HttpStatus.OK && resp.body() ) {
+                return OpenweathermapParser.currentWeatherFromJSONElement(new JSONObject(resp.body())) // <2>
+            }
+        } catch (Exception e) {
+            return null // <3>
         }
-        null // <3>
     }
 
   /**
