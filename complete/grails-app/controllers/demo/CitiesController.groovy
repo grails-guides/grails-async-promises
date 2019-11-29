@@ -9,14 +9,15 @@ import org.openweathermap.Unit
 
 @CompileStatic
 class CitiesController {
-    
+
+    public static final String US = 'us'
     OpenweathermapService openweathermapService
     
     def index(String unit, boolean async) {
         Unit unitEnum = Unit.unitWithString(unit)
 
         if ( async ) { // <1>
-            Promise<List<CurrentWeather>> currentWeatherList = openweathermapService.findCurrentWeatherByCitiesAndCountryCodeWithPromises(LargestUSCities.CITIES, 'us', unitEnum)
+            Promise<List<CurrentWeather>> currentWeatherList = openweathermapService.findCurrentWeatherByCitiesAndCountryCodeWithPromises(LargestUSCities.CITIES, US, unitEnum)
             return tasks( // <2>
                     currentWeatherList: currentWeatherList,
                     unit: createBoundPromise(unitEnum)
