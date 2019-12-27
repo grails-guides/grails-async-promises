@@ -80,7 +80,7 @@ dependencies {
     compile "io.micronaut:micronaut-http-client"
     //end::datastore-rest-client[]
     //tag::ersatz[]
-    testCompile 'com.stehno.ersatz:ersatz:1.4.0'
+    testCompile 'com.stehno.ersatz:ersatz:2.0.0'
     //end::ersatz[]
 }
 
