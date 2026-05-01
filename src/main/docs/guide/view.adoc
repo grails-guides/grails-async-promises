@@ -1,8 +1,0 @@
-Render the weather forecast grid with a GSP:
-
-[source, xml]
-.grails-app/views/cities/index.gsp
-----
-include::{sourcedir}/grails-app/views/cities/index.gsp[]
-----
-
