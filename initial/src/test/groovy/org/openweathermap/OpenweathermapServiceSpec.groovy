@@ -96,7 +96,6 @@ class OpenweathermapServiceSpec extends Specification implements ServiceUnitTest
         currentWeather.main.tempMin == 19
         currentWeather.main.tempMax == 22
         currentWeather.weather
-        currentWeather.weather[0].main == 'Clouds'
         currentWeather.weather[0].id == 803
         currentWeather.weather[0].main == 'Clouds'
         currentWeather.weather[0].description == 'broken clouds'
